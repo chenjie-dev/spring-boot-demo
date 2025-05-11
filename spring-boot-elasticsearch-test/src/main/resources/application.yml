@@ -5,7 +5,7 @@ spring:
     name: spring-boot-elasticsearch
   elasticSearch:
     cluster-name: ${ES_CLUSTER_NAME:elastic}
-    host: ${ES_HOST:10.31.63.96}
+    host: ${ES_HOST:localhost}
     port: ${ES_PORT:9200}
     scheme: http
     auth-enable: true

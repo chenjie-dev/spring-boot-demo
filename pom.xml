@@ -9,6 +9,20 @@
 
     <modules>
         <module>spring-boot-base-config</module>
+        <module>spring-boot-data-config</module>
+        <module>spring-boot-redis-config</module>
+        <module>spring-boot-kafka-config</module>
+        <module>spring-boot-elasticsearch-config</module>
+        <module>spring-cloud-base-config</module>
+        <module>spring-boot-redis-test</module>
+        <module>spring-boot-mysql-test</module>
+        <module>spring-boot-kafka-test</module>
+        <module>spring-boot-elasticsearch-test</module>
+        <module>spring-boot-webflux-test</module>
+        <module>spring-cloud-hystrix-test</module>
+        <module>spring-boot-guava-test</module>
+        <module>spring-boot-caffeine-test</module>
+        <module>spring-boot-ratelimit-test</module>
     </modules>
 
     <properties>
