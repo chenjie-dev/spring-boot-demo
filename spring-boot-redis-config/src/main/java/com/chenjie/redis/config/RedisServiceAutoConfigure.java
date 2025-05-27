@@ -4,7 +4,6 @@ import com.chenjie.redis.StarterRedisTemplate;
 import com.chenjie.redis.constant.RedisStarterConstant;
 import com.chenjie.redis.serializer.RedisKeySerializer;
 import com.chenjie.redis.serializer.RedisValueJacksonSerializer;
-import io.fabric8.kubernetes.client.KubernetesClient;
 import io.lettuce.core.cluster.ClusterClientOptions;
 import io.lettuce.core.cluster.ClusterTopologyRefreshOptions;
 import io.lettuce.core.resource.ClientResources;
@@ -20,7 +19,9 @@ import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.connection.RedisClusterConfiguration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisPassword;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
@@ -42,9 +43,6 @@ public class RedisServiceAutoConfigure {
     @Autowired
     private PrefixConfig prefixConfig;
 
-    @Autowired
-    private KubernetesClient kubernetesClient;
-
     /**
      * key 的序列化器
      */
@@ -56,7 +54,7 @@ public class RedisServiceAutoConfigure {
     private RedisValueJacksonSerializer valueRedisSerializer = new RedisValueJacksonSerializer();
 
     @Bean
-    public CacheManager cacheManager(LettuceConnectionFactory redisConnectionFactory) {
+    public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
         // RedisCacheWriter
         RedisCacheWriter redisCacheWriter = RedisCacheWriter.nonLockingRedisCacheWriter(redisConnectionFactory);
         // RedisCacheConfiguration - 值的序列化方式
@@ -66,7 +64,6 @@ public class RedisServiceAutoConfigure {
         return new RedisCacheManager(redisCacheWriter, redisCacheConfiguration);
     }
 
-
     private GenericObjectPoolConfig getPoolConfig(RedisProperties.Pool properties) {
         GenericObjectPoolConfig config = new GenericObjectPoolConfig();
         config.setMaxTotal(properties.getMaxActive());
@@ -75,55 +72,68 @@ public class RedisServiceAutoConfigure {
         if (properties.getMaxWait() != null) {
             config.setMaxWaitMillis(properties.getMaxWait().toMillis());
         }
-
         return config;
     }
 
     @Bean
-    public RedisClusterConfiguration getClusterConfig() {
-        //添加redis 集群节点信息
-        RedisClusterConfiguration rcc = new RedisClusterConfiguration(redisProperties.getCluster().getNodes());
-        rcc.setPassword(RedisPassword.of(redisProperties.getPassword()));
-        rcc.setMaxRedirects(100);
-        return rcc;
-    }
-
-    @Bean
-    public LettuceConnectionFactory redisConnectionFactory(RedisClusterConfiguration cluster, LettuceClientConfiguration lettuceClientConfiguration) {
-        return new LettuceConnectionFactory(cluster, lettuceClientConfiguration);
-    }
-
-    @Bean
-    public LettuceClientConfiguration lettuceClientConfiguration(ClientResources clientResources) {
-
-        ClusterTopologyRefreshOptions clusterTopologyRefreshOptions = ClusterTopologyRefreshOptions.builder()
-                //.enablePeriodicRefresh(Duration.ofSeconds(5))
-                // 开启全部自适应刷新 自适应刷新不开启,Redis集群变更时将会导致连接异常
-                .enableAllAdaptiveRefreshTriggers()
-                .adaptiveRefreshTriggersTimeout(Duration.ofSeconds(10))
-                // 开周期刷新
-                //.enablePeriodicRefresh(Duration.ofSeconds(10))
-                .build();
-
-        ClusterClientOptions clusterClientOptions = ClusterClientOptions.builder()
-                //.autoReconnect(false)  是否自动重连
-                //.pingBeforeActivateConnection(Boolean.TRUE)
-                //.cancelCommandsOnReconnectFailure(Boolean.TRUE)
-                //.disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS)
-                .topologyRefreshOptions(clusterTopologyRefreshOptions).build();
-        //没有配置的话，则默认为3s
-        if (redisProperties.getTimeout() == null) {
-            redisProperties.setTimeout(Duration.ofSeconds(3L));
+    public LettuceConnectionFactory redisConnectionFactory() {
+        LettuceClientConfiguration clientConfig = getLettuceClientConfiguration();
+        
+        if (redisProperties.getCluster() != null && !redisProperties.getCluster().getNodes().isEmpty()) {
+            // 集群模式
+            RedisClusterConfiguration clusterConfig = new RedisClusterConfiguration(redisProperties.getCluster().getNodes());
+            if (redisProperties.getPassword() != null) {
+                clusterConfig.setPassword(RedisPassword.of(redisProperties.getPassword()));
+            }
+            clusterConfig.setMaxRedirects(redisProperties.getCluster().getMaxRedirects());
+            return new LettuceConnectionFactory(clusterConfig, clientConfig);
+        } else {
+            // 单机模式
+            RedisStandaloneConfiguration standaloneConfig = new RedisStandaloneConfiguration();
+            standaloneConfig.setHostName(redisProperties.getHost());
+            standaloneConfig.setPort(redisProperties.getPort());
+            if (redisProperties.getPassword() != null) {
+                standaloneConfig.setPassword(RedisPassword.of(redisProperties.getPassword()));
+            }
+            standaloneConfig.setDatabase(redisProperties.getDatabase());
+            return new LettuceConnectionFactory(standaloneConfig, clientConfig);
         }
-        return LettucePoolingClientConfiguration.builder().commandTimeout(redisProperties.getTimeout())
-                .poolConfig(getPoolConfig(redisProperties.getLettuce().getPool()))
-                .clientResources(clientResources)
-                .clientOptions(clusterClientOptions)
-                .build();
+    }
+
+    private LettuceClientConfiguration getLettuceClientConfiguration() {
+        LettuceClientConfiguration.LettuceClientConfigurationBuilder builder;
+        
+        // 设置连接池
+        if (redisProperties.getLettuce() != null && redisProperties.getLettuce().getPool() != null) {
+            builder = LettucePoolingClientConfiguration.builder()
+                    .poolConfig(getPoolConfig(redisProperties.getLettuce().getPool()));
+        } else {
+            builder = LettuceClientConfiguration.builder();
+        }
+        
+        // 设置超时时间
+        if (redisProperties.getTimeout() != null) {
+            builder.commandTimeout(redisProperties.getTimeout());
+        }
+
+        // 设置集群拓扑刷新选项
+        if (redisProperties.getCluster() != null) {
+            ClusterTopologyRefreshOptions clusterTopologyRefreshOptions = ClusterTopologyRefreshOptions.builder()
+                    .enableAllAdaptiveRefreshTriggers()
+                    .adaptiveRefreshTriggersTimeout(Duration.ofSeconds(10))
+                    .build();
+
+            ClusterClientOptions clusterClientOptions = ClusterClientOptions.builder()
+                    .topologyRefreshOptions(clusterTopologyRefreshOptions)
+                    .build();
+            builder.clientOptions(clusterClientOptions);
+        }
+
+        return builder.build();
     }
 
     @Bean
-    public StarterRedisTemplate<String, Object> redisTemplate(LettuceConnectionFactory redisConnectionFactory) {
+    public StarterRedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
         StarterRedisTemplate<String, Object> starterRedisTemplate = new StarterRedisTemplate<>();
 
         // 配置连接工厂
@@ -143,22 +153,12 @@ public class RedisServiceAutoConfigure {
     }
 
     private String chooseLocalNamespace() {
-        String namespace = "local";
-
         // 获取配置文件中配的localNamespace
         String localNamespace = prefixConfig.getLocalNamespace();
         // 配置文件里配的localNamespace优先级最高
         if (localNamespace != null && !"".equals(localNamespace)) {
-            namespace = localNamespace;
-        } else {
-            // 获取k8s命名空间
-            String k8sNamespace = kubernetesClient.getNamespace();
-            if (k8sNamespace != null) {
-                namespace = k8sNamespace;
-            }
+            return localNamespace;
         }
-
-        return namespace;
+        return "local";
     }
-
 }

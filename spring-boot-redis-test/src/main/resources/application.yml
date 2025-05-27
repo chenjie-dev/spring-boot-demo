@@ -9,12 +9,12 @@ spring:
     name: spring-boot-redis-test
   redis:
     # 集群模式节点连接配置
-    cluster:
-      nodes: ${REDIS_NODES:10.31.63.48:6379,10.31.63.49:6379,10.31.63.50:6379,10.31.63.51:6379,10.31.63.52:6379,10.31.63.53:6379}
+#    cluster:
+#      nodes: ${REDIS_NODES:106.52.6.69:6379}
     # 单节点模式节点连接配置
-    #host: localhost
-    #port: 6379
-    password: ${REDIS_PASSWORD:HkxuxW0Xsg}
+    host: 106.52.6.69
+    port: 6379
+    password: ${REDIS_PASSWORD:chenjie2020}
     prefix:
       namespace:
         namespaceSwitch: ${NAMESPACE_ENABLE:true}
