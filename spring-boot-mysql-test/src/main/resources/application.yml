@@ -9,9 +9,9 @@ spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driverClassName: com.mysql.jdbc.Driver
-    url: ${MYSQL_URL:jdbc:mysql://10.31.63.16:3306/cp_tenant_user_pro?useSSL=true&requireSSL=false&characterEncoding=UTF-8}
+    url: ${MYSQL_URL:jdbc:mysql://106.52.6.69:3306/test?useSSL=true&requireSSL=false&characterEncoding=UTF-8}
     username: ${MYSQL_USERNAME:root}
-    password: ${MYSQL_PASSWORD:iztNN49c5B}
+    password: ${MYSQL_PASSWORD:chenjie2020}
     initial-size: 10
     max-active: 100
     min-idle: 10

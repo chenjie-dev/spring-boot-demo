@@ -3,14 +3,16 @@ server:
 spring:
   cloud:
     kubernetes:
-      enabled: true
+      enabled: false
+      discovery:
+        enabled: false
   application:
     name: spring-boot-kafka-test
   aa-kafka:
     enabled: true
   kafka:
     enabled: true
-    bootstrap-servers: ${KAFKA_SERVERS:10.31.63.80:9094,10.31.63.81:9094,10.31.63.82:9094}
+    bootstrap-servers: ${KAFKA_SERVERS:106.52.6.69:9094}
     admin:
       client-id: admin-client
     listener:

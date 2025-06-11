@@ -1,8 +1,0 @@
-server:
-  port: 10041
-spring:
-  application:
-    name: spring-boot-webflux-test
-
-
-
