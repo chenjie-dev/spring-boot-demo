@@ -8,8 +8,8 @@ spring:
     name: spring-boot-mysql-test
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    driverClassName: com.mysql.jdbc.Driver
-    url: ${MYSQL_URL:jdbc:mysql://106.52.6.69:3306/test?useSSL=true&requireSSL=false&characterEncoding=UTF-8}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${MYSQL_URL:jdbc:mysql://106.52.6.69:3306/test?useSSL=true&requireSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai}
     username: ${MYSQL_USERNAME:root}
     password: ${MYSQL_PASSWORD:chenjie2020}
     initial-size: 10

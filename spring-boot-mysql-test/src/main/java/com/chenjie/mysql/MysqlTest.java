@@ -1,6 +1,6 @@
 package com.chenjie.mysql;
 
-import com.chenjie.mysql.service.WokerService;
+import com.chenjie.mysql.service.WorkerService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +15,12 @@ import java.sql.SQLException;
 public class MysqlTest {
 
     @Autowired
-    private WokerService wokerService;
+    private WorkerService workerService;
 
     @Test
     public void test() throws SQLException, InterruptedException {
-        wokerService.inserWorkerBatch();
+        System.out.println("Starting test...");
+        workerService.insertWorkerBatch();
+        System.out.println("Test completed.");
     }
-
 }

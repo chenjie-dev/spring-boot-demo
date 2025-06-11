@@ -1,20 +1,16 @@
 package com.chenjie.mysql.entity;
 
-
-import com.baomidou.mybatisplus.activerecord.Model;
-import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.annotations.TableId;
-import com.baomidou.mybatisplus.annotations.TableName;
-import com.baomidou.mybatisplus.enums.IdType;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
 @TableName("department")
-public class Department extends Model<Department> {
+public class Department implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -25,9 +21,4 @@ public class Department extends Model<Department> {
 
     @TableField("name")
     private String name;
-
-    @Override
-    protected Serializable pkVal() {
-        return this.id;
-    }
 }

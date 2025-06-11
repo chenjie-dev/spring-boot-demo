@@ -1,10 +1,7 @@
 package com.chenjie.data.config;
 
-import com.baomidou.mybatisplus.exceptions.MybatisPlusException;
-import com.baomidou.mybatisplus.toolkit.PluginUtils;
-import com.baomidou.mybatisplus.toolkit.SqlUtils;
-import com.baomidou.mybatisplus.toolkit.StringUtils;
-import com.baomidou.mybatisplus.toolkit.SystemClock;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.core.toolkit.SystemClock;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.plugin.*;
@@ -127,13 +124,12 @@ public class SqlInterceptor implements Interceptor {
         long timing = SystemClock.now() - start;
 
         // 格式化 SQL 打印执行结果
-        Object target = PluginUtils.realTarget(invocation.getTarget());
-        MetaObject metaObject = SystemMetaObject.forObject(target);
+        MetaObject metaObject = SystemMetaObject.forObject(invocation.getTarget());
         MappedStatement ms = (MappedStatement) metaObject.getValue("delegate.mappedStatement");
         StringBuilder formatSql = new StringBuilder();
         formatSql.append(" Time：").append(timing);
         formatSql.append(" ms - ID：").append(ms.getId());
-        formatSql.append("\n Execute SQL：").append(SqlUtils.sqlFormat(originalSql, format)).append("\n");
+        formatSql.append("\n Execute SQL：").append(originalSql).append("\n");
         if (this.isWriteInLog()) {
             if (this.getMaxTime() >= 1 && timing > this.getMaxTime()) {
                 logger.error(formatSql.toString());
@@ -143,7 +139,7 @@ public class SqlInterceptor implements Interceptor {
         } else {
             System.err.println(formatSql.toString());
             if (this.getMaxTime() >= 1 && timing > this.getMaxTime()) {
-                throw new MybatisPlusException(" The SQL execution time is too large, please optimize ! ");
+                throw new RuntimeException(" The SQL execution time is too large, please optimize ! ");
             }
         }
         return result;
@@ -165,7 +161,7 @@ public class SqlInterceptor implements Interceptor {
             this.maxTime = Long.parseLong(maxTime);
         }
         if (StringUtils.isNotEmpty(format)) {
-            this.format = Boolean.valueOf(format);
+            this.format = Boolean.parseBoolean(format);
         }
     }
 
@@ -196,7 +192,7 @@ public class SqlInterceptor implements Interceptor {
         return this;
     }
 
-    public Method getMethodRegular(Class<?> clazz, String methodName) {
+    private Method getMethodRegular(Class<?> clazz, String methodName) {
         if (Object.class.equals(clazz)) {
             return null;
         }

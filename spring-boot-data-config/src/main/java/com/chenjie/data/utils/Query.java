@@ -1,12 +1,12 @@
 package com.chenjie.data.utils;
 
-import com.baomidou.mybatisplus.plugins.Page;
+import com.baomidou.mybatisplus.core.metadata.OrderItem;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.chenjie.data.xss.SQLFilter;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 
 public class Query<T> extends LinkedHashMap<String, Object> {
     private static final long serialVersionUID = 1L;
@@ -49,10 +49,11 @@ public class Query<T> extends LinkedHashMap<String, Object> {
 
         //排序
         if (StringUtils.isNotBlank(sidx) && StringUtils.isNotBlank(order)) {
-            this.page.setOrderByField(sidx);
-            this.page.setAsc("ASC".equalsIgnoreCase(order));
+            OrderItem orderItem = new OrderItem();
+            orderItem.setColumn(sidx);
+            orderItem.setAsc("ASC".equalsIgnoreCase(order));
+            this.page.addOrder(orderItem);
         }
-
     }
 
     public Page<T> getPage() {
