@@ -7,24 +7,26 @@ spring:
       enabled: true
   application:
     name: spring-boot-redis-test
-  redis:
-    # 集群模式节点连接配置
-#    cluster:
-#      nodes: ${REDIS_NODES:106.52.6.69:6379}
-    # 单节点模式节点连接配置
-    host: 106.52.6.69
-    port: 6379
-    password: ${REDIS_PASSWORD:chenjie2020}
-    prefix:
-      namespace:
-        namespaceSwitch: ${NAMESPACE_ENABLE:true}
-        # 当前命名空间前缀-必配
-        localNamespace: ${LOCAL_NAMESPACE:backend-manage}
-        # 公共命名空间前缀-必配
-        publicNamespace: ${PUBLIC_NAMESPACE:public}
-    lettuce:
-      pool:
-        max-idle: 96
-        max-wait: -1
-        max-active: 96
-        min-idle: 48
+  data:
+    redis:
+
+      # 集群模式节点连接配置
+  #    cluster:
+  #      nodes: ${REDIS_NODES:106.52.6.69:6379}
+      # 单节点模式节点连接配置
+      host: 106.52.6.69
+      port: 6379
+      password: ${REDIS_PASSWORD:chenjie2020}
+      prefix:
+        namespace:
+          namespaceSwitch: ${NAMESPACE_ENABLE:true}
+          # 当前命名空间前缀-必配
+          localNamespace: ${LOCAL_NAMESPACE:backend-manage}
+          # 公共命名空间前缀-必配
+          publicNamespace: ${PUBLIC_NAMESPACE:public}
+      lettuce:
+        pool:
+          max-idle: 96
+          max-wait: -1
+          max-active: 96
+          min-idle: 48

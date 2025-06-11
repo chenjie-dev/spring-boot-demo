@@ -27,17 +27,14 @@
 
     <properties>
         <SpringBoot-Demo.version>0.0.1</SpringBoot-Demo.version>
-        <spring-boot.version>2.7.18</spring-boot.version>
-
+        <spring-boot.version>3.4.6</spring-boot.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>17</java.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <install.version>0.0.1</install.version>
         <mdep.outputFile>${project.build.directory}/classpath.info</mdep.outputFile>
-
     </properties>
 
     <dependencyManagement>
@@ -84,11 +81,6 @@
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>1.18.28</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>1.7.36</version>
             </dependency>
             <dependency>
                 <groupId>com.alibaba</groupId>
@@ -169,6 +161,13 @@
                 <groupId>org.mybatis</groupId>
                 <artifactId>mybatis</artifactId>
                 <version>3.5.10</version>
+            </dependency>
+
+            <!-- Spring Boot的日志依赖 -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-logging</artifactId>
+                <version>${spring-boot.version}</version>
             </dependency>
 
         </dependencies>
