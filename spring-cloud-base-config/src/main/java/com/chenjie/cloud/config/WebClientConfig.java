@@ -61,22 +61,4 @@ public class WebClientConfig {
 
         return WebClient.builder().clientConnector(connector).build();
     }
-
-//    @Bean
-//    @ConditionalOnClass(PrometheusMeterRegistry.class)
-//    public WebClient webClient(ReactorResourceFactory reactorResourceFactory, PrometheusMeterRegistry registry) {
-//
-//        Function<HttpClient, HttpClient> mapper = httpClient ->
-//                httpClient.tcpConfiguration(c -> c.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,connectTimeout));
-//
-//        ClientHttpConnector connector = new ReactorClientHttpConnector(reactorResourceFactory,mapper);
-//        MetricsWebClientFilterFunction metricsFilter = new MetricsWebClientFilterFunction(
-//                registry,
-//                new DefaultWebClientExchangeTagsProvider(),
-//                "call_service_metrics",
-//                AutoTimer.ENABLED
-//        );
-//        return WebClient.builder().clientConnector(connector).filter(metricsFilter).build();
-//    }
-
 }

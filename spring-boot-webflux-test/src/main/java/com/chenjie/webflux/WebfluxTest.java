@@ -27,23 +27,20 @@ public class WebfluxTest {
     public void testWebClientGet() throws InterruptedException {
         AtomicInteger counter = new AtomicInteger(0);
 
-        while (counter.get() < 10000){
-            Mono<String> mono = webClientBuilder
-                    .baseUrl(httpUrlGet)
-                    .build()
-                    .get()
-                    .retrieve()
-                    .bodyToMono(String.class);
+        Mono<String> mono = webClientBuilder
+                .baseUrl(httpUrlGet)
+                .build()
+                .get()
+                .retrieve()
+                .bodyToMono(String.class);
 
-            mono.doOnError(e -> {
-                log.warn(">>>>>  exception:{} >>>>>", e.getMessage());
-            }).subscribe(res -> {
+        mono.doOnError(e -> {
+            log.warn(">>>>>  exception:{} >>>>>", e.getMessage());
+        }).subscribe(res -> {
 //            调用subscribe方法订阅Mono对象，并在收到响应时记录信息日志
-                log.info(">>>>> subscribe <<<<<");
-                log.info(">>>>> res:{} <<<<<", counter.getAndIncrement());
-            });
-        }
-
+            log.info(">>>>> subscribe <<<<<");
+            log.info(">>>>> res:{} <<<<<", counter.getAndIncrement());
+        });
         log.info(">>>>> 主线程结束 <<<<<");
 
         Thread.sleep(100 * 1000L);
