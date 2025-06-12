@@ -19,7 +19,7 @@
         <module>spring-boot-kafka-test</module>
         <module>spring-boot-elasticsearch-test</module>
         <module>spring-boot-webflux-test</module>
-        <module>spring-cloud-hystrix-test</module>
+        <module>spring-cloud-sentinel-test</module>
         <module>spring-boot-guava-test</module>
         <module>spring-boot-caffeine-test</module>
         <module>spring-boot-ratelimit-test</module>
@@ -27,7 +27,9 @@
 
     <properties>
         <SpringBoot-Demo.version>0.0.1</SpringBoot-Demo.version>
-        <spring-boot.version>3.4.6</spring-boot.version>
+        <spring-boot.version>3.5.0</spring-boot.version>
+        <spring-cloud.version>2025.0.0</spring-cloud.version>
+        <spring-cloud-alibaba.version>2023.0.3.3</spring-cloud-alibaba.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>17</java.version>
@@ -62,6 +64,24 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-autoconfigure</artifactId>
                 <version>${spring-boot.version}</version>
+            </dependency>
+
+            <!--spring-cloud-->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!--spring-cloud-alibaba-->
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+                <version>${spring-cloud-alibaba.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <!--本地缓存-->

@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: sentinel-test
+  cloud:
+    sentinel:
+      transport:
+        dashboard: localhost:8080
+      eager: true
+      filter:
+        enabled: true
+
+server:
+  port: 8081 
