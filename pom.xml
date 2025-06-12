@@ -50,7 +50,7 @@
         <commons-io.version>2.15.1</commons-io.version>
         
         <!-- ES相关版本 -->
-        <elasticsearch.version>7.17.14</elasticsearch.version>
+        <elasticsearch.version>8.18.1</elasticsearch.version>
         
         <!-- MySQL相关版本 -->
         <mybatis-plus.version>3.5.5</mybatis-plus.version>

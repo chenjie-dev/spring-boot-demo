@@ -78,17 +78,32 @@ public class ESRestAuthConfig {
             throw new RuntimeException("Failed to create SSL context", e);
         }
 
-        final RestClientBuilder builder = RestClient.builder(new HttpHost(esHost[0], esPort, scheme))
+        // 创建 RestClient
+        RestClient restClient = RestClient.builder(new HttpHost(esHost[0], esPort, scheme))
                 .setHttpClientConfigCallback(httpClientBuilder -> {
                     httpClientBuilder.setSSLContext(sslContext);
                     httpClientBuilder.setSSLHostnameVerifier((hostname, session) -> true);
                     httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
-                    httpClientBuilder.setKeepAliveStrategy((response, context) -> TimeUnit.MINUTES.toMillis(keepAliveTime));
+                    httpClientBuilder.setKeepAliveStrategy((response, context) -> TimeUnit.SECONDS.toMillis(keepAliveTime));
+                    httpClientBuilder.setMaxConnTotal(100);
+                    httpClientBuilder.setMaxConnPerRoute(100);
                     return httpClientBuilder;
-                });
+                })
+                .setRequestConfigCallback(requestConfigBuilder -> {
+                    requestConfigBuilder.setConnectTimeout(1000);
+                    requestConfigBuilder.setSocketTimeout(30000);
+                    requestConfigBuilder.setConnectionRequestTimeout(500);
+                    return requestConfigBuilder;
+                })
+                .build();
 
-        RestClient restClient = builder.build();
-        ElasticsearchTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
+        // 创建传输层
+        ElasticsearchTransport transport = new RestClientTransport(
+            restClient,
+            new JacksonJsonpMapper()
+        );
+
+        // 创建客户端
         return new ElasticsearchClient(transport);
     }
 
@@ -116,17 +131,35 @@ public class ESRestAuthConfig {
 
     public ElasticsearchClient getElasticsearchClient(String[] host, int port, String scheme) {
         final HttpHost[] hosts = makeHttpHost(host, port, scheme);
-        final RestClientBuilder restClientBuilder = RestClient.builder(hosts);
-        setConnectTimeOutConfig(restClientBuilder);
-        setMutiConnectConfig(restClientBuilder);
-        restClientBuilder.setFailureListener(new RestClient.FailureListener() {
-            public void onFailure(org.elasticsearch.client.Node node) {
-                log.error("elasticSearch - failure：[{}]", node.toString());
-            }
-        }).setHttpClientConfigCallback(config -> config.setKeepAliveStrategy((response, context) -> TimeUnit.MINUTES.toMillis(keepAliveTime)));
         
-        RestClient restClient = restClientBuilder.build();
-        ElasticsearchTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
+        // 创建 RestClient
+        RestClient restClient = RestClient.builder(hosts)
+                .setHttpClientConfigCallback(httpClientBuilder -> {
+                    httpClientBuilder.setKeepAliveStrategy((response, context) -> TimeUnit.SECONDS.toMillis(keepAliveTime));
+                    httpClientBuilder.setMaxConnTotal(100);
+                    httpClientBuilder.setMaxConnPerRoute(100);
+                    return httpClientBuilder;
+                })
+                .setRequestConfigCallback(requestConfigBuilder -> {
+                    requestConfigBuilder.setConnectTimeout(1000);
+                    requestConfigBuilder.setSocketTimeout(30000);
+                    requestConfigBuilder.setConnectionRequestTimeout(500);
+                    return requestConfigBuilder;
+                })
+                .setFailureListener(new RestClient.FailureListener() {
+                    public void onFailure(org.elasticsearch.client.Node node) {
+                        log.error("elasticSearch - failure：[{}]", node.toString());
+                    }
+                })
+                .build();
+
+        // 创建传输层
+        ElasticsearchTransport transport = new RestClientTransport(
+            restClient,
+            new JacksonJsonpMapper()
+        );
+
+        // 创建客户端
         return new ElasticsearchClient(transport);
     }
 
