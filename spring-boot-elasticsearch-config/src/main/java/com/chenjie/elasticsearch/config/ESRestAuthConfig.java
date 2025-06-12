@@ -1,52 +1,34 @@
 package com.chenjie.elasticsearch.config;
 
 import com.alibaba.fastjson.JSONObject;
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.json.jackson.JacksonJsonpMapper;
+import co.elastic.clients.transport.ElasticsearchTransport;
+import co.elastic.clients.transport.rest_client.RestClientTransport;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
-import org.apache.http.nio.conn.ssl.SSLIOSessionStrategy;
-import org.elasticsearch.client.Node;
+import org.apache.http.ssl.SSLContexts;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
-import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.lang.Nullable;
 
-import javax.net.ssl.*;
-import java.security.SecureRandom;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.Objects;
+import javax.net.ssl.SSLContext;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @Description Elasticsearch账密认证模式的RestHighLevel客户端
+ * @Description Elasticsearch账密认证模式的客户端配置
  */
 @Configuration
 @Slf4j
 public class ESRestAuthConfig {
 
-    static TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
-        @Override
-        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        }
-
-        @Override
-        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        }
-
-        @Override
-        public X509Certificate[] getAcceptedIssuers() {
-            return null;
-        }
-    }};
     @Value("${spring.elasticSearch.host}")
     private String[] esHost;
     @Value("${spring.elasticSearch.port}")
@@ -77,40 +59,46 @@ public class ESRestAuthConfig {
     }
 
     /**
-     * 走认证模式的客户端，注入时需要使用@Qualifier("AuthRestHighLevelClient")进行指定
+     * 走认证模式的客户端，注入时需要使用@Qualifier("AuthElasticsearchClient")进行指定
      *
      * @return
      */
-    @Bean("AuthRestHighLevelClient")
-    public RestHighLevelClient createAuthRestHighLevelClient() {
+    @Bean("AuthElasticsearchClient")
+    public ElasticsearchClient createAuthElasticsearchClient() {
         final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(esUserName, esUserPassword));
 
-        SSLContext sc = null;
+        final SSLContext sslContext;
         try {
-            sc = SSLContext.getInstance("SSL");
-            sc.init(null, trustAllCerts, new SecureRandom());
+            sslContext = SSLContexts.custom()
+                    .loadTrustMaterial(null, (chain, authType) -> true)
+                    .build();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to create SSL context", e);
+            throw new RuntimeException("Failed to create SSL context", e);
         }
 
-        SSLIOSessionStrategy sessionStrategy = new SSLIOSessionStrategy(sc, new NullHostNameVerifier());
+        final RestClientBuilder builder = RestClient.builder(new HttpHost(esHost[0], esPort, scheme))
+                .setHttpClientConfigCallback(httpClientBuilder -> {
+                    httpClientBuilder.setSSLContext(sslContext);
+                    httpClientBuilder.setSSLHostnameVerifier((hostname, session) -> true);
+                    httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+                    httpClientBuilder.setKeepAliveStrategy((response, context) -> TimeUnit.MINUTES.toMillis(keepAliveTime));
+                    return httpClientBuilder;
+                });
 
-        SecuredHttpClientConfigCallback httpClientConfigCallback = new SecuredHttpClientConfigCallback(sessionStrategy, credentialsProvider);
-        RestClientBuilder builder = RestClient.builder(new HttpHost(esHost[0], esPort, scheme))
-                .setHttpClientConfigCallback(httpClientConfigCallback);
-        RestHighLevelClient client = new RestHighLevelClient(builder);
-
-        return client;
+        RestClient restClient = builder.build();
+        ElasticsearchTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
+        return new ElasticsearchClient(transport);
     }
 
-    @Bean("noAuthRestHighLevelClient")
-    public RestHighLevelClient createNoAuthRestHighLevelClient() {
-        return getRestHighLevelClient(esHost, esPort, scheme);
+    @Bean("noAuthElasticsearchClient")
+    public ElasticsearchClient createNoAuthElasticsearchClient() {
+        return getElasticsearchClient(esHost, esPort, scheme);
     }
 
     private void setMutiConnectConfig(RestClientBuilder restClientBuilder) {
-        restClientBuilder.setHttpClientConfigCallback((httpClientBuilder) -> {
+        restClientBuilder.setHttpClientConfigCallback(httpClientBuilder -> {
             httpClientBuilder.setMaxConnTotal(100);
             httpClientBuilder.setMaxConnPerRoute(100);
             return httpClientBuilder;
@@ -118,7 +106,7 @@ public class ESRestAuthConfig {
     }
 
     private void setConnectTimeOutConfig(RestClientBuilder restClientBuilder) {
-        restClientBuilder.setRequestConfigCallback((requestConfigBuilder) -> {
+        restClientBuilder.setRequestConfigCallback(requestConfigBuilder -> {
             requestConfigBuilder.setConnectTimeout(1000);
             requestConfigBuilder.setSocketTimeout(30000);
             requestConfigBuilder.setConnectionRequestTimeout(500);
@@ -126,94 +114,29 @@ public class ESRestAuthConfig {
         });
     }
 
-    public RestHighLevelClient getRestHighLevelClient(String[] host, int port, String scheme) {
-        HttpHost[] hosts = makeHttpHost(host, port, scheme);
-        RestClientBuilder restClientBuilder = RestClient.builder(hosts);
+    public ElasticsearchClient getElasticsearchClient(String[] host, int port, String scheme) {
+        final HttpHost[] hosts = makeHttpHost(host, port, scheme);
+        final RestClientBuilder restClientBuilder = RestClient.builder(hosts);
         setConnectTimeOutConfig(restClientBuilder);
         setMutiConnectConfig(restClientBuilder);
         restClientBuilder.setFailureListener(new RestClient.FailureListener() {
-            public void onFailure(Node node) {
+            public void onFailure(org.elasticsearch.client.Node node) {
                 log.error("elasticSearch - failure：[{}]", node.toString());
             }
         }).setHttpClientConfigCallback(config -> config.setKeepAliveStrategy((response, context) -> TimeUnit.MINUTES.toMillis(keepAliveTime)));
-        ;
-        return new RestHighLevelClient(restClientBuilder);
+        
+        RestClient restClient = restClientBuilder.build();
+        ElasticsearchTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
+        return new ElasticsearchClient(transport);
     }
 
-    @Bean("AutoCheckWhetherAuthRestHighLevelClient")
+    @Bean("AutoCheckWhetherAuthElasticsearchClient")
     @Primary
-    public RestHighLevelClient createAutoCheckWhetherAuthRestHighLevelClient() {
+    public ElasticsearchClient createAutoCheckWhetherAuthElasticsearchClient() {
         if (authEnable) {
-            return createAuthRestHighLevelClient();
+            return createAuthElasticsearchClient();
         } else {
-            return createNoAuthRestHighLevelClient();
+            return createNoAuthElasticsearchClient();
         }
     }
-
-    public static class NullHostNameVerifier implements HostnameVerifier {
-        @Override
-        public boolean verify(String arg0, SSLSession arg1) {
-            return true;
-        }
-    }
-
-    class SecuredHttpClientConfigCallback implements RestClientBuilder.HttpClientConfigCallback {
-        @Nullable
-        private final CredentialsProvider credentialsProvider;
-        /**
-         * The {@link SSLIOSessionStrategy} for all requests to enable SSL / TLS encryption.
-         */
-        private final SSLIOSessionStrategy sslStrategy;
-
-        /**
-         * Create a new {@link SecuredHttpClientConfigCallback}.
-         *
-         * @param credentialsProvider The credential provider, if a username/password have been supplied
-         * @param sslStrategy         The SSL strategy, if SSL / TLS have been supplied
-         * @throws NullPointerException if {@code sslStrategy} is {@code null}
-         */
-        SecuredHttpClientConfigCallback(final SSLIOSessionStrategy sslStrategy,
-                                        @Nullable final CredentialsProvider credentialsProvider) {
-            this.sslStrategy = Objects.requireNonNull(sslStrategy);
-            this.credentialsProvider = credentialsProvider;
-        }
-
-        /**
-         * Get the {@link CredentialsProvider} that will be added to the HTTP client.
-         *
-         * @return Can be {@code null}.
-         */
-        @Nullable
-        CredentialsProvider getCredentialsProvider() {
-            return credentialsProvider;
-        }
-
-        /**
-         * Get the {@link SSLIOSessionStrategy} that will be added to the HTTP client.
-         *
-         * @return Never {@code null}.
-         */
-        SSLIOSessionStrategy getSSLStrategy() {
-            return sslStrategy;
-        }
-
-        /**
-         * Sets the {@linkplain HttpAsyncClientBuilder#setDefaultCredentialsProvider(CredentialsProvider) credential provider},
-         *
-         * @param httpClientBuilder The client to configure.
-         * @return Always {@code httpClientBuilder}.
-         */
-        @Override
-        public HttpAsyncClientBuilder customizeHttpClient(final HttpAsyncClientBuilder httpClientBuilder) {
-            // enable SSL / TLS
-            httpClientBuilder.setSSLStrategy(sslStrategy);
-            // enable user authentication
-            if (credentialsProvider != null) {
-                httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
-            }
-            httpClientBuilder.setKeepAliveStrategy((response, context) -> TimeUnit.MINUTES.toMillis(keepAliveTime));
-            return httpClientBuilder;
-        }
-    }
-
 }
