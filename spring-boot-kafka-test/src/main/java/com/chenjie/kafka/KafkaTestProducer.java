@@ -8,8 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.concurrent.ListenableFutureCallback;
-
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -17,7 +15,7 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 public class KafkaTestProducer {
 
     @Autowired
-    private KafkaTemplate kafkaTemplate;
+    private KafkaTemplate<String, String> kafkaTemplate;
 
     private static final String testTopic = "chenjie-test-topic";
 
@@ -25,18 +23,13 @@ public class KafkaTestProducer {
     public void test() {
         while (true) {
             kafkaTemplate.send(testTopic, "test" + System.currentTimeMillis())
-                    .addCallback(new ListenableFutureCallback<SendResult<String, String>>() {
-                                     @Override
-                                     public void onSuccess(SendResult<String, String> stringStringSendResult) {
-                                         log.info(">>>>> 发送成功 <<<<<");
-                                     }
-
-                                     @Override
-                                     public void onFailure(Throwable throwable) {
-                                         log.info(">>>>> 发送失败 <<<<<");
-                                     }
-                                 }
-                    );
+                    .whenComplete((result, ex) -> {
+                        if (ex == null) {
+                            log.info(">>>>> 发送成功 <<<<<");
+                        } else {
+                            log.info(">>>>> 发送失败 <<<<<");
+                        }
+                    });
         }
     }
 }
