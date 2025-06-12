@@ -181,11 +181,4 @@ public class ActiveActiveKafkaConfigure {
         jaas.setOptions(jaasProperties.getOptions());
         return jaas;
     }
-
-    @Bean
-    public KafkaAdmin kafkaAdmin() {
-        KafkaAdmin kafkaAdmin = new KafkaAdmin(this.kafkaProperties.buildAdminProperties());
-        kafkaAdmin.setFatalIfBrokerNotAvailable(this.kafkaProperties.getAdmin().isFailFast());
-        return kafkaAdmin;
-    }
 }
