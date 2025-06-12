@@ -7,11 +7,11 @@ import org.springframework.core.env.Environment;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.lang.Nullable;
-import org.springframework.util.concurrent.ListenableFuture;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -110,7 +110,7 @@ public final class KafkaService<K, V> {
      * @param data
      * @return
      */
-    public Future<ListenableFuture<SendResult<K, V>>> send(String topic, V data) {
+    public Future<CompletableFuture<SendResult<K, V>>> send(String topic, V data) {
         if (Objects.isNull(kafkaTemplate)) {
             logger.error("Cannot find the bean kafkaTemplate, please check your configuration.");
             return null;
@@ -118,7 +118,7 @@ public final class KafkaService<K, V> {
         return workers.submit(() -> kafkaTemplate.send(addTopicPrefix(topic), data));
     }
 
-    public Future<ListenableFuture<SendResult<K, V>>> send(String topic, String namespace, V data) {
+    public Future<CompletableFuture<SendResult<K, V>>> send(String topic, String namespace, V data) {
         if (Objects.isNull(kafkaTemplate)) {
             logger.error("Cannot find the bean kafkaTemplate, please check your configuration.");
             return null;
@@ -134,7 +134,7 @@ public final class KafkaService<K, V> {
      * @param data
      * @return
      */
-    public Future<ListenableFuture<SendResult<K, V>>> send(String topic, K key, @Nullable V data) {
+    public Future<CompletableFuture<SendResult<K, V>>> send(String topic, K key, @Nullable V data) {
         if (Objects.isNull(kafkaTemplate)) {
             logger.error("Cannot find the bean kafkaTemplate, please check your configuration.");
             return null;
@@ -142,7 +142,7 @@ public final class KafkaService<K, V> {
         return workers.submit(() -> kafkaTemplate.send(addTopicPrefix(topic), key, data));
     }
 
-    public Future<ListenableFuture<SendResult<K, V>>> send(String topic, String namespace, K key, @Nullable V data) {
+    public Future<CompletableFuture<SendResult<K, V>>> send(String topic, String namespace, K key, @Nullable V data) {
         if (Objects.isNull(kafkaTemplate)) {
             logger.error("Cannot find the bean kafkaTemplate, please check your configuration.");
             return null;
@@ -150,7 +150,7 @@ public final class KafkaService<K, V> {
         return workers.submit(() -> kafkaTemplate.send(addTopicPrefix(topic, namespace), key, data));
     }
 
-    public Future<ListenableFuture<SendResult<K, V>>> send(String topic, Integer partition, K key, @Nullable V data) {
+    public Future<CompletableFuture<SendResult<K, V>>> send(String topic, Integer partition, K key, @Nullable V data) {
         if (Objects.isNull(kafkaTemplate)) {
             logger.error("Cannot find the bean kafkaTemplate, please check your configuration.");
             return null;
@@ -168,7 +168,7 @@ public final class KafkaService<K, V> {
      * @param data
      * @return
      */
-    public Future<ListenableFuture<SendResult<K, V>>> send(String topic, String namespace, Integer partition, K key, @Nullable V data) {
+    public Future<CompletableFuture<SendResult<K, V>>> send(String topic, String namespace, Integer partition, K key, @Nullable V data) {
         if (Objects.isNull(kafkaTemplate)) {
             logger.error("Cannot find the bean kafkaTemplate, please check your configuration.");
             return null;
@@ -176,7 +176,7 @@ public final class KafkaService<K, V> {
         return workers.submit(() -> kafkaTemplate.send(addTopicPrefix(topic, namespace), partition, key, data));
     }
 
-    public Future<ListenableFuture<SendResult<K, V>>> send(String topic, Integer partition, Long timestamp, K key,
+    public Future<CompletableFuture<SendResult<K, V>>> send(String topic, Integer partition, Long timestamp, K key,
                                                            @Nullable V data) {
         if (Objects.isNull(kafkaTemplate)) {
             logger.error("Cannot find the bean kafkaTemplate, please check your configuration.");
@@ -196,7 +196,7 @@ public final class KafkaService<K, V> {
      * @param data
      * @return
      */
-    public Future<ListenableFuture<SendResult<K, V>>> send(String topic, String namespace, Integer partition, Long timestamp, K key,
+    public Future<CompletableFuture<SendResult<K, V>>> send(String topic, String namespace, Integer partition, Long timestamp, K key,
                                                            @Nullable V data) {
         if (Objects.isNull(kafkaTemplate)) {
             logger.error("Cannot find the bean kafkaTemplate, please check your configuration.");
@@ -212,7 +212,7 @@ public final class KafkaService<K, V> {
      * @param data
      * @return
      */
-    public Future<ListenableFuture<SendResult<K, V>>> aaSend(String topic, V data) {
+    public Future<CompletableFuture<SendResult<K, V>>> aaSend(String topic, V data) {
         if (Objects.isNull(aaKafkaTemplate)) {
             logger.error("Cannot find the bean aaKafkaTemplate, please check your configuration.");
             return null;
@@ -220,7 +220,7 @@ public final class KafkaService<K, V> {
         return workers.submit(() -> aaKafkaTemplate.send(addTopicPrefix(topic), data));
     }
 
-    public Future<ListenableFuture<SendResult<K, V>>> aaSend(String topic, String namespace, V data) {
+    public Future<CompletableFuture<SendResult<K, V>>> aaSend(String topic, String namespace, V data) {
         if (Objects.isNull(aaKafkaTemplate)) {
             logger.error("Cannot find the bean aaKafkaTemplate, please check your configuration.");
             return null;
@@ -228,7 +228,7 @@ public final class KafkaService<K, V> {
         return workers.submit(() -> aaKafkaTemplate.send(addTopicPrefix(topic, namespace), data));
     }
 
-    public Future<ListenableFuture<SendResult<K, V>>> aaSend(String topic, K key, @Nullable V data) {
+    public Future<CompletableFuture<SendResult<K, V>>> aaSend(String topic, K key, @Nullable V data) {
         if (Objects.isNull(aaKafkaTemplate)) {
             logger.error("Cannot find the bean aaKafkaTemplate, please check your configuration.");
             return null;
@@ -236,7 +236,7 @@ public final class KafkaService<K, V> {
         return workers.submit(() -> aaKafkaTemplate.send(addTopicPrefix(topic), key, data));
     }
 
-    public Future<ListenableFuture<SendResult<K, V>>> aaSend(String topic, String namespace, K key, @Nullable V data) {
+    public Future<CompletableFuture<SendResult<K, V>>> aaSend(String topic, String namespace, K key, @Nullable V data) {
         if (Objects.isNull(aaKafkaTemplate)) {
             logger.error("Cannot find the bean aaKafkaTemplate, please check your configuration.");
             return null;
@@ -244,7 +244,7 @@ public final class KafkaService<K, V> {
         return workers.submit(() -> aaKafkaTemplate.send(addTopicPrefix(topic, namespace), key, data));
     }
 
-    public Future<ListenableFuture<SendResult<K, V>>> aaSend(String topic, Integer partition, K key, @Nullable V data) {
+    public Future<CompletableFuture<SendResult<K, V>>> aaSend(String topic, Integer partition, K key, @Nullable V data) {
         if (Objects.isNull(aaKafkaTemplate)) {
             logger.error("Cannot find the bean aaKafkaTemplate, please check your configuration.");
             return null;
@@ -252,7 +252,7 @@ public final class KafkaService<K, V> {
         return workers.submit(() -> aaKafkaTemplate.send(addTopicPrefix(topic), partition, key, data));
     }
 
-    public Future<ListenableFuture<SendResult<K, V>>> aaSend(String topic, String namespace, Integer partition, K key, @Nullable V data) {
+    public Future<CompletableFuture<SendResult<K, V>>> aaSend(String topic, String namespace, Integer partition, K key, @Nullable V data) {
         if (Objects.isNull(aaKafkaTemplate)) {
             logger.error("Cannot find the bean aaKafkaTemplate, please check your configuration.");
             return null;
@@ -260,7 +260,7 @@ public final class KafkaService<K, V> {
         return workers.submit(() -> aaKafkaTemplate.send(addTopicPrefix(topic, namespace), partition, key, data));
     }
 
-    public Future<ListenableFuture<SendResult<K, V>>> aaSend(String topic, Integer partition, Long timestamp, K key,
+    public Future<CompletableFuture<SendResult<K, V>>> aaSend(String topic, Integer partition, Long timestamp, K key,
                                                              @Nullable V data) {
         if (Objects.isNull(aaKafkaTemplate)) {
             logger.error("Cannot find the bean aaKafkaTemplate, please check your configuration.");
@@ -269,7 +269,7 @@ public final class KafkaService<K, V> {
         return workers.submit(() -> aaKafkaTemplate.send(addTopicPrefix(topic), partition, timestamp, key, data));
     }
 
-    public Future<ListenableFuture<SendResult<K, V>>> aaSend(String topic, String namespace, Integer partition, Long timestamp, K key,
+    public Future<CompletableFuture<SendResult<K, V>>> aaSend(String topic, String namespace, Integer partition, Long timestamp, K key,
                                                              @Nullable V data) {
         if (Objects.isNull(aaKafkaTemplate)) {
             logger.error("Cannot find the bean aaKafkaTemplate, please check your configuration.");
@@ -284,36 +284,36 @@ public final class KafkaService<K, V> {
      * @param topic 发送的主题
      * @param data  发送的内容
      */
-    public List<Future<ListenableFuture<SendResult<K, V>>>> bothSend(String topic, V data) {
+    public List<Future<CompletableFuture<SendResult<K, V>>>> bothSend(String topic, V data) {
         return Arrays.asList(send(topic, data), aaSend(topic, data));
     }
 
-    public List<Future<ListenableFuture<SendResult<K, V>>>> bothSend(String topic, String namespace, V data) {
+    public List<Future<CompletableFuture<SendResult<K, V>>>> bothSend(String topic, String namespace, V data) {
         return Arrays.asList(send(topic, namespace, data), aaSend(topic, namespace, data));
     }
 
-    public List<Future<ListenableFuture<SendResult<K, V>>>> bothSend(String topic, K key, @Nullable V data) {
+    public List<Future<CompletableFuture<SendResult<K, V>>>> bothSend(String topic, K key, @Nullable V data) {
         return Arrays.asList(send(topic, key, data), aaSend(topic, key, data));
     }
 
-    public List<Future<ListenableFuture<SendResult<K, V>>>> bothSend(String topic, String namespace, K key, @Nullable V data) {
+    public List<Future<CompletableFuture<SendResult<K, V>>>> bothSend(String topic, String namespace, K key, @Nullable V data) {
         return Arrays.asList(send(topic, namespace, key, data), aaSend(topic, namespace, key, data));
     }
 
-    public List<Future<ListenableFuture<SendResult<K, V>>>> bothSend(String topic, Integer partition, K key, @Nullable V data) {
+    public List<Future<CompletableFuture<SendResult<K, V>>>> bothSend(String topic, Integer partition, K key, @Nullable V data) {
         return Arrays.asList(send(topic, partition, key, data), aaSend(topic, partition, key, data));
     }
 
-    public List<Future<ListenableFuture<SendResult<K, V>>>> bothSend(String topic, String namespace, Integer partition, K key, @Nullable V data) {
+    public List<Future<CompletableFuture<SendResult<K, V>>>> bothSend(String topic, String namespace, Integer partition, K key, @Nullable V data) {
         return Arrays.asList(send(topic, namespace, partition, key, data), aaSend(topic, namespace, partition, key, data));
     }
 
-    public List<Future<ListenableFuture<SendResult<K, V>>>> bothSend(String topic, Integer partition, Long timestamp, K key,
+    public List<Future<CompletableFuture<SendResult<K, V>>>> bothSend(String topic, Integer partition, Long timestamp, K key,
                                                                      @Nullable V data) {
         return Arrays.asList(send(topic, partition, timestamp, key, data), aaSend(topic, partition, timestamp, key, data));
     }
 
-    public List<Future<ListenableFuture<SendResult<K, V>>>> bothSend(String topic, String namespace, Integer partition, Long timestamp, K key,
+    public List<Future<CompletableFuture<SendResult<K, V>>>> bothSend(String topic, String namespace, Integer partition, Long timestamp, K key,
                                                                      @Nullable V data) {
         return Arrays.asList(send(topic, namespace, partition, timestamp, key, data), aaSend(topic, namespace, partition, timestamp, key, data));
     }
