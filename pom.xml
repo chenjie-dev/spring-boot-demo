@@ -23,6 +23,7 @@
         <module>spring-boot-guava-test</module>
         <module>spring-boot-caffeine-test</module>
         <module>spring-boot-ratelimit-test</module>
+        <module>spring-boot-threadlocal-test</module>
     </modules>
 
     <properties>

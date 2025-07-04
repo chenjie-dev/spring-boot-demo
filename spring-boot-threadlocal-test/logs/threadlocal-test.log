@@ -1,0 +1,16 @@
+2025-07-04 15:10:59.035 [main] INFO  c.c.t.ThreadLocalTestApplicationTests - Starting ThreadLocalTestApplicationTests using Java 17.0.15 with PID 33162 (started by chenjie in /Users/chenjie/git/spring-boot-demo/spring-boot-threadlocal-test)
+2025-07-04 15:10:59.035 [main] DEBUG c.c.t.ThreadLocalTestApplicationTests - Running with Spring Boot v3.5.0, Spring v6.2.7
+2025-07-04 15:10:59.036 [main] INFO  c.c.t.ThreadLocalTestApplicationTests - No active profile set, falling back to 1 default profile: "default"
+2025-07-04 15:10:59.528 [main] INFO  c.c.t.ThreadLocalTestApplicationTests - Started ThreadLocalTestApplicationTests in 0.7 seconds (process running for 1.412)
+2025-07-04 15:10:59.837 [main] DEBUG c.c.t.context.SystemContextHolder - Set system context: SystemContext{clientIp='192.168.1.200', userId='user456', username='testuser2', requestId='null', requestPath='null'}
+2025-07-04 15:10:59.839 [main] DEBUG c.c.t.context.SystemContextHolder - Clearing system context: SystemContext{clientIp='192.168.1.200', userId='user456', username='testuser2', requestId='null', requestPath='null'}
+2025-07-04 15:10:59.848 [main] DEBUG c.c.t.context.SystemContextHolder - Set system context: SystemContext{clientIp='192.168.1.100', userId='user123', username='testuser', requestId='null', requestPath='null'}
+2025-07-04 15:10:59.850 [main] DEBUG c.c.t.context.SystemContextHolder - Clearing system context: SystemContext{clientIp='192.168.1.100', userId='user123', username='testuser', requestId='null', requestPath='null'}
+2025-07-04 15:11:13.753 [main] INFO  c.c.t.ThreadLocalTestApplicationTests - Starting ThreadLocalTestApplicationTests using Java 17.0.15 with PID 33198 (started by chenjie in /Users/chenjie/git/spring-boot-demo/spring-boot-threadlocal-test)
+2025-07-04 15:11:13.754 [main] DEBUG c.c.t.ThreadLocalTestApplicationTests - Running with Spring Boot v3.5.0, Spring v6.2.7
+2025-07-04 15:11:13.754 [main] INFO  c.c.t.ThreadLocalTestApplicationTests - No active profile set, falling back to 1 default profile: "default"
+2025-07-04 15:11:14.220 [main] INFO  c.c.t.ThreadLocalTestApplicationTests - Started ThreadLocalTestApplicationTests in 0.618 seconds (process running for 1.261)
+2025-07-04 15:11:14.572 [main] DEBUG c.c.t.context.SystemContextHolder - Set system context: SystemContext{clientIp='192.168.1.200', userId='user456', username='testuser2', requestId='null', requestPath='null'}
+2025-07-04 15:16:51.656 [main] DEBUG c.c.t.context.SystemContextHolder - Clearing system context: SystemContext{clientIp='192.168.1.200', userId='user456', username='testuser2', requestId='null', requestPath='null'}
+2025-07-04 15:16:51.676 [main] DEBUG c.c.t.context.SystemContextHolder - Set system context: SystemContext{clientIp='192.168.1.100', userId='user123', username='testuser', requestId='null', requestPath='null'}
+2025-07-04 15:16:51.677 [main] DEBUG c.c.t.context.SystemContextHolder - Clearing system context: SystemContext{clientIp='192.168.1.100', userId='user123', username='testuser', requestId='null', requestPath='null'}
